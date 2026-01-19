@@ -48,6 +48,7 @@ const schema = `
   type Query {
     hello: String
     events: [Event!]!
+    feedbacks(eventId: ID!): [Feedback!]!
   }
 
   type Mutation {
@@ -59,6 +60,8 @@ const resolvers = {
   Query: {
     hello: () => 'Hello from GraphQL!',
     events: () => store.events,
+    feedbacks: (_: unknown, { eventId }: { eventId: string }) => 
+      store.feedbacks.filter((f) => f.eventId === eventId),
   },
   Mutation: {
     submitFeedback: (_: unknown, { eventId, text, rating }: { eventId: string; text: string; rating: number }) => {

@@ -95,23 +95,23 @@ A TypeScript web application where users can share feedback on events (workshops
 ### Commit 4: Feedback Display
 *Users can view feedback for selected event*
 
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 
 **Backend:**
-- [ ] Add `Query.feedbacks(eventId)` (basic, no filters yet)
+- [x] Add `Query.feedbacks(eventId)` (basic, no filters yet)
 
 **Frontend:**
-- [ ] Create `features/feedback-stream/` module
-  - [ ] FeedbackList component
-  - [ ] FeedbackCard component
-  - [ ] useFeedbacks hook
+- [x] Create `features/feedback-list/` module
+  - [x] FeedbackList component
+  - [x] FeedbackCard component
+  - [x] useFeedbacks hook
 
 **Visible UI:**
-- [ ] Feedback list below the form
-- [ ] Each feedback shows: rating stars, feedback text, timestamp
-- [ ] Empty state: "No feedback yet. Be the first!"
-- [ ] Loading state: Skeleton cards while fetching
-- [ ] Newly submitted feedback appears in list (refetch after submit)
+- [x] Feedback list below the form
+- [x] Each feedback shows: rating stars, feedback text, timestamp
+- [x] Empty state: "No feedback yet. Be the first!"
+- [x] Loading state: Skeleton cards while fetching
+- [x] Newly submitted feedback appears in list (key-based refetch)
 
 ---
 
