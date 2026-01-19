@@ -7,15 +7,34 @@ import mercurius from 'mercurius';
 /* eslint-disable-next-line */
 export interface AppOptions {}
 
+// In-memory store
+const store = {
+  events: [
+    { id: '1', name: 'React Summit 2026', type: 'Conference', date: '2026-03-15' },
+    { id: '2', name: 'TypeScript Workshop', type: 'Workshop', date: '2026-02-20' },
+    { id: '3', name: 'GraphQL Best Practices', type: 'Webinar', date: '2026-01-25' },
+    { id: '4', name: 'Node.js Performance Tuning', type: 'Workshop', date: '2026-04-10' },
+  ],
+};
+
 const schema = `
+  type Event {
+    id: ID!
+    name: String!
+    type: String!
+    date: String!
+  }
+
   type Query {
     hello: String
+    events: [Event!]!
   }
 `;
 
 const resolvers = {
   Query: {
     hello: () => 'Hello from GraphQL!',
+    events: () => store.events,
   },
 };
 

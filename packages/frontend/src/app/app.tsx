@@ -1,17 +1,12 @@
-import { Layout, Card, Typography, ConfigProvider, theme, Row, Col } from 'antd';
-import { useQuery } from 'urql';
+import { useState } from 'react';
+import { Layout, Card, Typography, ConfigProvider, theme, Row, Col, Descriptions } from 'antd';
+import { EventSelector, Event } from './features/events';
 
 const { Header, Content } = Layout;
 const { Text, Paragraph } = Typography;
 
-const HELLO_QUERY = `
-  query Hello {
-    hello
-  }
-`;
-
 export function App() {
-  const [result] = useQuery({ query: HELLO_QUERY });
+  const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
 
   return (
     <Layout>
@@ -25,15 +20,27 @@ export function App() {
         </Header>
       </ConfigProvider>
       <Content>
-        <Card title="Welcome to Event Feedback Hub!">
+        <Card title="Select an Event">
           <Paragraph type="secondary">
-            Share your feedback on events you've attended (workshops, webinars, conferences) 
-            and view others' feedback in real-time.
+            Choose an event to view feedback and submit your own.
           </Paragraph>
-          <Paragraph>
-            {result.data?.hello}
-          </Paragraph>
+          <EventSelector
+            value={selectedEvent?.id}
+            onChange={(_, event) => setSelectedEvent(event)}
+          />
         </Card>
+
+        {selectedEvent && (
+          <Card title={selectedEvent.name}>
+            <Descriptions column={1}>
+              <Descriptions.Item label="Type">{selectedEvent.type}</Descriptions.Item>
+              <Descriptions.Item label="Date">{selectedEvent.date}</Descriptions.Item>
+            </Descriptions>
+            <Paragraph type="secondary">
+              Feedback submission coming soon...
+            </Paragraph>
+          </Card>
+        )}
       </Content>
     </Layout>
   );

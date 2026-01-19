@@ -48,24 +48,24 @@ A TypeScript web application where users can share feedback on events (workshops
 ### Commit 2: Events List & Selection
 *Users can see and select events*
 
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 
 **Backend:**
-- [ ] Add `Event` type to schema (id, name, type, date)
-- [ ] Add `Query.events`
-- [ ] Create in-memory store with events array
-- [ ] Seed sample events (3-5 events)
+- [x] Add `Event` type to schema (id, name, type, date)
+- [x] Add `Query.events`
+- [x] Create in-memory store with events array
+- [x] Seed sample events (4 events)
 
 **Frontend:**
-- [ ] Create `features/events/` module
-  - [ ] EventSelector component
-  - [ ] useEvents hook
-  - [ ] types
+- [x] Create `features/events/` module
+  - [x] EventSelector component
+  - [x] useEvents hook
+  - [x] types
 
 **Visible UI:**
-- [ ] Event dropdown selector in the content area
-- [ ] When event selected: Show Card with event details (name, type, date)
-- [ ] Placeholder text: "Select an event to see feedback and submit your own"
+- [x] Event dropdown selector in the content area
+- [x] When event selected: Show Card with event details (name, type, date)
+- [x] Placeholder text: "Feedback submission coming soon..."
 
 ---
 
