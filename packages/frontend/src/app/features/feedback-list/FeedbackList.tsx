@@ -17,14 +17,52 @@ export function FeedbackList({ eventId }: FeedbackListProps) {
     first: PAGE_SIZE,
   });
   const [realtimeFeedbacks, setRealtimeFeedbacks] = useState<Feedback[]>([]);
+  const [accumulatedFeedbacks, setAccumulatedFeedbacks] = useState<Feedback[]>([]);
+  const [displayLimit, setDisplayLimit] = useState(PAGE_SIZE);
   const pendingNotification = useRef(false);
+  const lastAccumulatedKey = useRef<string | null>(null);
   
   const { feedbacks, totalCount, hasNextPage, endCursor, fetching } = useFeedbacks(eventId, filters);
 
-  // Clear realtime feedbacks when event changes
+  // Accumulate feedbacks from server responses - only when event+cursor changes
+  useEffect(() => {
+    // Skip if no feedbacks
+    if (feedbacks.length === 0) return;
+    
+    // Verify feedbacks belong to the current event (avoid stale cache data)
+    const feedbacksBelongToCurrentEvent = feedbacks.every((f) => f.eventId === eventId);
+    if (!feedbacksBelongToCurrentEvent) return;
+    
+    // Create a unique key for this event + cursor combination
+    const currentKey = `${eventId}:${filters.after ?? 'initial'}`;
+    if (lastAccumulatedKey.current === currentKey) return;
+    
+    lastAccumulatedKey.current = currentKey;
+    
+    // If this is the initial load for this event, replace; otherwise append
+    const isInitialForEvent = !filters.after;
+    setAccumulatedFeedbacks((prev) => {
+      if (isInitialForEvent) {
+        return feedbacks;
+      }
+      const combined = [...prev, ...feedbacks];
+      // Dedupe by id
+      const seen = new Set<string>();
+      return combined.filter((f) => {
+        if (seen.has(f.id)) return false;
+        seen.add(f.id);
+        return true;
+      });
+    });
+  }, [feedbacks, filters.after, eventId]);
+
+  // Clear everything when event changes
   useEffect(() => {
     setRealtimeFeedbacks([]);
+    setAccumulatedFeedbacks([]);
+    setDisplayLimit(PAGE_SIZE);
     setFilters({ first: PAGE_SIZE });
+    lastAccumulatedKey.current = null;
   }, [eventId]);
 
   // Show notification after render, not during
@@ -48,19 +86,9 @@ export function FeedbackList({ eventId }: FeedbackListProps) {
 
   useFeedbackSubscription(eventId, handleNewFeedback);
 
-  const handleLoadMore = () => {
-    setFilters((f) => ({ ...f, after: endCursor ?? undefined }));
-  };
-
-  const handleFiltersChange = (newFilters: FeedbackFilters) => {
-    // Reset cursor and realtime feedbacks when filters change
-    setRealtimeFeedbacks([]);
-    setFilters({ ...newFilters, first: PAGE_SIZE, after: undefined });
-  };
-
-  // Combine and dedupe feedbacks, then sort by createdAt descending
+  // Combine realtime + accumulated, dedupe, and sort
   const allFeedbacks = useMemo(() => {
-    const combined = [...realtimeFeedbacks, ...feedbacks];
+    const combined = [...realtimeFeedbacks, ...accumulatedFeedbacks];
     // Dedupe by id
     const seen = new Set<string>();
     const deduped = combined.filter((f) => {
@@ -72,30 +100,59 @@ export function FeedbackList({ eventId }: FeedbackListProps) {
     return deduped.sort((a, b) => 
       new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
     );
-  }, [realtimeFeedbacks, feedbacks]);
+  }, [realtimeFeedbacks, accumulatedFeedbacks]);
+
+  // Slice to display limit
+  const visibleFeedbacks = useMemo(() => {
+    return allFeedbacks.slice(0, displayLimit);
+  }, [allFeedbacks, displayLimit]);
+
+  const handleLoadMore = () => {
+    const newLimit = displayLimit + PAGE_SIZE;
+    setDisplayLimit(newLimit);
+    
+    // If we need more from the server, fetch the next page
+    if (newLimit > allFeedbacks.length && hasNextPage) {
+      setFilters((f) => ({ ...f, after: endCursor ?? undefined }));
+    }
+  };
+
+  const handleFiltersChange = (newFilters: FeedbackFilters) => {
+    // Reset everything when filters change
+    setRealtimeFeedbacks([]);
+    setAccumulatedFeedbacks([]);
+    setDisplayLimit(PAGE_SIZE);
+    setFilters({ ...newFilters, first: PAGE_SIZE, after: undefined });
+  };
+
+  // Total count includes realtime additions
+  const actualTotalCount = totalCount + realtimeFeedbacks.length;
+  
+  // Show load more if there are more items locally OR more on server
+  const showLoadMore = displayLimit < allFeedbacks.length || hasNextPage;
 
   return (
     <Space direction="vertical" size="middle">
       <FeedbackFiltersBar
         filters={filters}
         onChange={handleFiltersChange}
-        totalCount={totalCount + realtimeFeedbacks.length}
+        totalCount={actualTotalCount}
       />
 
-      {fetching && allFeedbacks.length === 0 ? (
+      {fetching && visibleFeedbacks.length === 0 ? (
         <>
           <Skeleton active />
           <Skeleton active />
         </>
-      ) : allFeedbacks.length === 0 ? (
+      ) : visibleFeedbacks.length === 0 ? (
         <Empty description="No feedback yet. Be the first!" />
       ) : (
-        allFeedbacks.map((feedback) => (
+        visibleFeedbacks.map((feedback) => (
           <FeedbackCard key={feedback.id} feedback={feedback} />
         ))
       )}
 
-      {hasNextPage && (
+      {showLoadMore && (
         <Button onClick={handleLoadMore} loading={fetching}>
           Load More
         </Button>
