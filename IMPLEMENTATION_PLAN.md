@@ -72,23 +72,23 @@ A TypeScript web application where users can share feedback on events (workshops
 ### Commit 3: Feedback Submission
 *Users can submit feedback (form visible, success message shown)*
 
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 
 **Backend:**
-- [ ] Add `Feedback` type to schema (id, eventId, text, rating, createdAt)
-- [ ] Add `Mutation.submitFeedback(eventId, text, rating)`
-- [ ] Add feedbacks array to store
+- [x] Add `Feedback` type to schema (id, eventId, text, rating, createdAt)
+- [x] Add `Mutation.submitFeedback(eventId, text, rating)`
+- [x] Add feedbacks array to store
 
 **Frontend:**
-- [ ] Create `features/feedback-form/` module
-  - [ ] FeedbackForm component
-  - [ ] useSubmitFeedback hook
+- [x] Create `features/feedback-form/` module
+  - [x] FeedbackForm component
+  - [x] useSubmitFeedback hook
 
 **Visible UI:**
-- [ ] Feedback form below event selector (disabled until event selected)
-- [ ] Form: TextArea + Star Rating + Submit Button
-- [ ] On submit: Success notification + form resets
-- [ ] Temporary: Show "Feedback submitted! (Display coming in next update)" message
+- [x] Feedback form below event details (shown when event selected)
+- [x] Form: TextArea + Star Rating + Submit Button
+- [x] On submit: Success notification + form resets
+- [x] Wrapped App with AntApp for message API
 
 ---
 

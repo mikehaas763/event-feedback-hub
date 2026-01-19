@@ -8,13 +8,25 @@ import mercurius from 'mercurius';
 export interface AppOptions {}
 
 // In-memory store
-const store = {
+interface Feedback {
+  id: string;
+  eventId: string;
+  text: string;
+  rating: number;
+  createdAt: string;
+}
+
+const store: {
+  events: { id: string; name: string; type: string; date: string }[];
+  feedbacks: Feedback[];
+} = {
   events: [
     { id: '1', name: 'React Summit 2026', type: 'Conference', date: '2026-03-15' },
     { id: '2', name: 'TypeScript Workshop', type: 'Workshop', date: '2026-02-20' },
     { id: '3', name: 'GraphQL Best Practices', type: 'Webinar', date: '2026-01-25' },
     { id: '4', name: 'Node.js Performance Tuning', type: 'Workshop', date: '2026-04-10' },
   ],
+  feedbacks: [],
 };
 
 const schema = `
@@ -25,9 +37,21 @@ const schema = `
     date: String!
   }
 
+  type Feedback {
+    id: ID!
+    eventId: ID!
+    text: String!
+    rating: Int!
+    createdAt: String!
+  }
+
   type Query {
     hello: String
     events: [Event!]!
+  }
+
+  type Mutation {
+    submitFeedback(eventId: ID!, text: String!, rating: Int!): Feedback!
   }
 `;
 
@@ -35,6 +59,19 @@ const resolvers = {
   Query: {
     hello: () => 'Hello from GraphQL!',
     events: () => store.events,
+  },
+  Mutation: {
+    submitFeedback: (_: unknown, { eventId, text, rating }: { eventId: string; text: string; rating: number }) => {
+      const feedback: Feedback = {
+        id: String(store.feedbacks.length + 1),
+        eventId,
+        text,
+        rating,
+        createdAt: new Date().toISOString(),
+      };
+      store.feedbacks.push(feedback);
+      return feedback;
+    },
   },
 };
 
