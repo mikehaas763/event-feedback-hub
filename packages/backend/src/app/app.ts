@@ -45,10 +45,26 @@ const schema = `
     createdAt: String!
   }
 
+  type FeedbackEdge {
+    node: Feedback!
+    cursor: String!
+  }
+
+  type PageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
+  }
+
+  type FeedbackConnection {
+    edges: [FeedbackEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+  }
+
   type Query {
     hello: String
     events: [Event!]!
-    feedbacks(eventId: ID!): [Feedback!]!
+    feedbacks(eventId: ID!, minRating: Int, first: Int, after: String): FeedbackConnection!
   }
 
   type Mutation {
@@ -60,8 +76,43 @@ const resolvers = {
   Query: {
     hello: () => 'Hello from GraphQL!',
     events: () => store.events,
-    feedbacks: (_: unknown, { eventId }: { eventId: string }) => 
-      store.feedbacks.filter((f) => f.eventId === eventId),
+    feedbacks: (_: unknown, { eventId, minRating, first = 10, after }: { 
+      eventId: string; 
+      minRating?: number; 
+      first?: number; 
+      after?: string;
+    }) => {
+      let filtered = store.feedbacks.filter((f) => f.eventId === eventId);
+      
+      if (minRating !== undefined) {
+        filtered = filtered.filter((f) => f.rating >= minRating);
+      }
+      
+      const totalCount = filtered.length;
+      
+      // Find starting point if cursor provided
+      if (after) {
+        const cursorIndex = filtered.findIndex((f) => f.id === after);
+        if (cursorIndex !== -1) {
+          filtered = filtered.slice(cursorIndex + 1);
+        }
+      }
+      
+      const hasNextPage = filtered.length > first;
+      const edges = filtered.slice(0, first).map((feedback) => ({
+        node: feedback,
+        cursor: feedback.id,
+      }));
+      
+      return {
+        edges,
+        pageInfo: {
+          hasNextPage,
+          endCursor: edges.length > 0 ? edges[edges.length - 1].cursor : null,
+        },
+        totalCount,
+      };
+    },
   },
   Mutation: {
     submitFeedback: (_: unknown, { eventId, text, rating }: { eventId: string; text: string; rating: number }) => {

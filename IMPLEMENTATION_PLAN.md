@@ -118,22 +118,21 @@ A TypeScript web application where users can share feedback on events (workshops
 ### Commit 5: Filtering & Pagination
 *Users can filter and paginate feedback*
 
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 
 **Backend:**
-- [ ] Extend `Query.feedbacks` with filter/pagination args (minRating, limit, offset)
-- [ ] Return total count
+- [x] Extend `Query.feedbacks` with filter args (minRating) and cursor pagination (first, after)
+- [x] Return FeedbackConnection with edges, pageInfo (hasNextPage, endCursor), totalCount
 
 **Frontend:**
-- [ ] Create `features/feedback-filters/` module
-  - [ ] FeedbackFilters component
-  - [ ] Pagination component
+- [x] Create `features/feedback-filters/` module
+  - [x] FeedbackFiltersBar component
 
 **Visible UI:**
-- [ ] Filter bar above feedback list: "Filter by rating" dropdown
-- [ ] Pagination below list
-- [ ] "Showing X of Y feedback" count
-- [ ] Filters apply immediately, list updates
+- [x] Filter bar above feedback list: "Filter by rating" dropdown
+- [x] "X feedbacks total" count
+- [x] "Load More" button for cursor-based pagination
+- [x] Filters reset cursor when changed
 
 ---
 
