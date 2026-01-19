@@ -1,25 +1,38 @@
 import * as path from 'path';
 import { FastifyInstance } from 'fastify';
 import AutoLoad from '@fastify/autoload';
+import mercurius from 'mercurius';
 
 /* eslint-disable-next-line */
 export interface AppOptions {}
 
-export async function app(fastify: FastifyInstance, opts: AppOptions) {
-  // Place here your custom code!
+const schema = `
+  type Query {
+    hello: String
+  }
+`;
 
-  // Do not touch the following lines
+const resolvers = {
+  Query: {
+    hello: () => 'Hello from GraphQL!',
+  },
+};
+
+export async function app(fastify: FastifyInstance, opts: AppOptions) {
+  // Register GraphQL
+  fastify.register(mercurius, {
+    schema,
+    resolvers,
+    graphiql: true,
+  });
 
   // This loads all plugins defined in plugins
-  // those should be support plugins that are reused
-  // through your application
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'plugins'),
     options: { ...opts },
   });
 
   // This loads all plugins defined in routes
-  // define your routes in one of these
   fastify.register(AutoLoad, {
     dir: path.join(__dirname, 'routes'),
     options: { ...opts },
