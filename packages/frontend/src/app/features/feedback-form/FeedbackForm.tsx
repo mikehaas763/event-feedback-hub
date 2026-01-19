@@ -5,7 +5,6 @@ const { TextArea } = Input;
 
 interface FeedbackFormProps {
   eventId: string;
-  onSuccess?: () => void;
 }
 
 interface FormValues {
@@ -13,7 +12,7 @@ interface FormValues {
   rating: number;
 }
 
-export function FeedbackForm({ eventId, onSuccess }: FeedbackFormProps) {
+export function FeedbackForm({ eventId }: FeedbackFormProps) {
   const [form] = Form.useForm<FormValues>();
   const { message } = App.useApp();
   const { submitFeedback, submitting } = useSubmitFeedback();
@@ -23,7 +22,6 @@ export function FeedbackForm({ eventId, onSuccess }: FeedbackFormProps) {
     if (result.data) {
       message.success('Feedback submitted successfully!');
       form.resetFields();
-      onSuccess?.();
     } else if (result.error) {
       message.error('Failed to submit feedback');
     }

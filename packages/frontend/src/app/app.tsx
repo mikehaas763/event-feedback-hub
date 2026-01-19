@@ -9,11 +9,6 @@ const { Text, Paragraph } = Typography;
 
 export function App() {
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const [feedbackKey, setFeedbackKey] = useState(0);
-
-  const handleFeedbackSubmitted = () => {
-    setFeedbackKey((k) => k + 1);
-  };
 
   return (
     <AntApp>
@@ -49,13 +44,13 @@ export function App() {
 
           {selectedEvent && (
             <Card title="Submit Feedback">
-              <FeedbackForm eventId={selectedEvent.id} onSuccess={handleFeedbackSubmitted} />
+              <FeedbackForm eventId={selectedEvent.id} />
             </Card>
           )}
 
           {selectedEvent && (
             <Card title="Feedback">
-              <FeedbackList key={feedbackKey} eventId={selectedEvent.id} />
+              <FeedbackList eventId={selectedEvent.id} />
             </Card>
           )}
         </Content>

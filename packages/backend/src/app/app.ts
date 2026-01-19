@@ -3,6 +3,7 @@ import { FastifyInstance } from 'fastify';
 import AutoLoad from '@fastify/autoload';
 import cors from '@fastify/cors';
 import mercurius from 'mercurius';
+import { PubSub } from 'mercurius';
 
 /* eslint-disable-next-line */
 export interface AppOptions {}
@@ -70,6 +71,10 @@ const schema = `
   type Mutation {
     submitFeedback(eventId: ID!, text: String!, rating: Int!): Feedback!
   }
+
+  type Subscription {
+    feedbackAdded(eventId: ID!): Feedback!
+  }
 `;
 
 const resolvers = {
@@ -83,6 +88,11 @@ const resolvers = {
       after?: string;
     }) => {
       let filtered = store.feedbacks.filter((f) => f.eventId === eventId);
+      
+      // Sort by createdAt descending (newest first)
+      filtered = filtered.sort((a, b) => 
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
       
       if (minRating !== undefined) {
         filtered = filtered.filter((f) => f.rating >= minRating);
@@ -115,7 +125,7 @@ const resolvers = {
     },
   },
   Mutation: {
-    submitFeedback: (_: unknown, { eventId, text, rating }: { eventId: string; text: string; rating: number }) => {
+    submitFeedback: (_: unknown, { eventId, text, rating }: { eventId: string; text: string; rating: number }, { pubsub }: { pubsub: PubSub }) => {
       const feedback: Feedback = {
         id: String(store.feedbacks.length + 1),
         eventId,
@@ -124,7 +134,18 @@ const resolvers = {
         createdAt: new Date().toISOString(),
       };
       store.feedbacks.push(feedback);
+      pubsub.publish({
+        topic: `FEEDBACK_ADDED_${eventId}`,
+        payload: { feedbackAdded: feedback },
+      });
       return feedback;
+    },
+  },
+  Subscription: {
+    feedbackAdded: {
+      subscribe: (_: unknown, { eventId }: { eventId: string }, { pubsub }: { pubsub: PubSub }) => {
+        return pubsub.subscribe(`FEEDBACK_ADDED_${eventId}`);
+      },
     },
   },
 };
@@ -140,6 +161,7 @@ export async function app(fastify: FastifyInstance, opts: AppOptions) {
     schema,
     resolvers,
     graphiql: true,
+    subscription: true,
   });
 
   // This loads all plugins defined in plugins

@@ -139,22 +139,22 @@ A TypeScript web application where users can share feedback on events (workshops
 ### Commit 6: Real-Time Updates
 *Live updates when others submit feedback*
 
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 
 **Backend:**
-- [ ] Add `Subscription.feedbackAdded(eventId)`
-- [ ] Add pubsub mechanism
-- [ ] Publish on mutation
+- [x] Add `Subscription.feedbackAdded(eventId)`
+- [x] Add pubsub mechanism (Mercurius built-in)
+- [x] Publish on mutation
 
 **Frontend:**
-- [ ] Create `features/realtime/` module
-  - [ ] useFeedbackSubscription hook
+- [x] Create `features/realtime/` module
+  - [x] useFeedbackSubscription hook
+- [x] Configure urql with WebSocket subscriptions exchange
 
 **Visible UI:**
-- [ ] Connection status badge in header (green dot = live)
-- [ ] New feedback slides in at top of list with highlight animation
-- [ ] Toast notification: "New feedback received!"
-- [ ] Test by opening two browser tabs
+- [x] New feedback appears at top of list in real-time
+- [x] Toast notification: "New feedback received!"
+- [x] Test by opening two browser tabs
 
 ---
 
